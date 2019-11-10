@@ -27,6 +27,9 @@ public class Configuration {
 	//是否启用小写处理
 	private boolean enableLowercase=true;
 
+	//是否启用mysql加载词典
+	private boolean enableMySqlDict=false;
+
 
 	@Inject
 	public Configuration(Environment env,Settings settings) {
@@ -36,6 +39,8 @@ public class Configuration {
 		this.useSmart = settings.get("use_smart", "false").equals("true");
 		this.enableLowercase = settings.get("enable_lowercase", "true").equals("true");
 		this.enableRemoteDict = settings.get("enable_remote_dict", "true").equals("true");
+		this.enableMySqlDict = settings.get("enable_mysql_dict", "true").equals("true");
+
 
 		Dictionary.initial(this);
 
@@ -71,5 +76,9 @@ public class Configuration {
 
 	public boolean isEnableLowercase() {
 		return enableLowercase;
+	}
+
+	public boolean isEnableMySqlDict() {
+		return enableMySqlDict;
 	}
 }

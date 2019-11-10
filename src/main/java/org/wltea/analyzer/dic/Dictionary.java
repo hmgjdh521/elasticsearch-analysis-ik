@@ -38,6 +38,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.sql.ResultSet;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -45,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -54,6 +54,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.common.io.PathUtils;
 import org.elasticsearch.plugin.analysis.ik.AnalysisIkPlugin;
+import org.plugin.MySqlConf;
+import org.plugin.MysqlDb;
 import org.wltea.analyzer.cfg.Configuration;
 import org.apache.logging.log4j.Logger;
 import org.wltea.analyzer.help.ESPluginLoggerFactory;
@@ -96,6 +98,24 @@ public class Dictionary {
 	private final static  String REMOTE_EXT_DICT = "remote_ext_dict";
 	private final static  String EXT_STOP = "ext_stopwords";
 	private final static  String REMOTE_EXT_STOP = "remote_ext_stopwords";
+
+
+	//mysql
+	private final static  String MYSQL_EXT_DICT_URL = "mysql_ext_dict_url";
+	private final static  String MYSQL_EXT_DICT_USERNAME = "mysql_ext_dict_username";
+	private final static  String MYSQL_EXT_DICT_PASSWORD = "mysql_ext_dict_password";
+	private final static  String MYSQL_EXT_DICT_TABLE = "mysql_ext_dict_table";
+	private final static  String MYSQL_EXT_DICT_KEYWORDFIELD = "mysql_ext_dict_keywordField";
+	private final static  String MYSQL_EXT_DICT_CREATEATFIELD = "mysql_ext_dict_createAtField";
+	private final static  String MYSQL_EXT_DICT_UPDATEATFIELD = "mysql_ext_dict_updateAtField";
+
+	private final static  String MYSQL_EXT_STOPWORDS_URL = "mysql_ext_stopwords_url";
+	private final static  String MYSQL_EXT_STOPWORDS_USERNAME = "mysql_ext_stopwords_username";
+	private final static  String MYSQL_EXT_STOPWORDS_PASSWORD = "mysql_ext_stopwords_password";
+	private final static  String MYSQL_EXT_STOPWORDS_TABLE = "mysql_ext_stopwords_table";
+	private final static  String MYSQL_EXT_STOPWORDS_KEYWORDFIELD = "mysql_ext_stopwords_keywordField";
+	private final static  String MYSQL_EXT_STOPWORDS_CREATEATFIELD = "mysql_ext_stopwords_createAtField";
+	private final static  String MYSQL_EXT_STOPWORDS_UPDATEATFIELD = "mysql_ext_stopwords_updateAtField";
 
 	private Path conf_dir;
 	private Properties props;
@@ -155,6 +175,9 @@ public class Dictionary {
 					singleton.loadPrepDict();
 					singleton.loadStopWordDict();
 
+					/**
+					 * 远程
+					 */
 					if(cfg.isEnableRemoteDict()){
 						// 建立监控线程
 						for (String location : singleton.getRemoteExtDictionarys()) {
@@ -163,6 +186,21 @@ public class Dictionary {
 						}
 						for (String location : singleton.getRemoteExtStopWordDictionarys()) {
 							pool.scheduleAtFixedRate(new Monitor(location), 10, 60, TimeUnit.SECONDS);
+						}
+					}
+
+					/**
+					 * mysql
+					 */
+					if(cfg.isEnableMySqlDict()){
+						MySqlConf mySqlConf = singleton.getMysqlExtDictionarys();
+						if(mySqlConf!=null){
+							pool.scheduleAtFixedRate(new MySqlMonitor(mySqlConf), 10, 60, TimeUnit.SECONDS);
+						}
+
+						MySqlConf mySqlConfStop = singleton.getMysqlExtStopWordDictionarys();
+						if(mySqlConf!=null) {
+							pool.scheduleAtFixedRate(new MySqlMonitor(mySqlConfStop), 10, 60, TimeUnit.SECONDS);
 						}
 					}
 
@@ -282,6 +320,75 @@ public class Dictionary {
 		return remoteExtStopWordDictFiles;
 	}
 
+
+	/**
+	 * mysql 配置 停用词
+	 * @return
+	 */
+	public MySqlConf getMysqlExtStopWordDictionarys() {
+
+		String table = getProperty(MYSQL_EXT_STOPWORDS_TABLE);
+		String mysqlUrl = getProperty(MYSQL_EXT_STOPWORDS_URL);
+		String password = getProperty(MYSQL_EXT_STOPWORDS_PASSWORD);
+		String username = getProperty(MYSQL_EXT_STOPWORDS_USERNAME);
+
+		String keywordFiled = getProperty(MYSQL_EXT_STOPWORDS_KEYWORDFIELD);
+		keywordFiled= keywordFiled==null?"keyWord":keywordFiled;
+
+		String createAtFiled = getProperty(MYSQL_EXT_STOPWORDS_CREATEATFIELD);
+		createAtFiled= createAtFiled==null?"create_at":createAtFiled;
+
+		String updateAtFiled = getProperty(MYSQL_EXT_STOPWORDS_UPDATEATFIELD);
+		updateAtFiled= updateAtFiled==null?"update_at":updateAtFiled;
+
+		if (table != null && mysqlUrl != null && password != null && username != null) {
+			MySqlConf conf = new MySqlConf();
+			conf.setPassWord(password);
+			conf.setTable(table);
+			conf.setUrl(mysqlUrl);
+			conf.setUserName(username);
+			conf.setKeyWordField(keywordFiled);
+			conf.setCreateAtField(createAtFiled);
+			conf.setUpdateAtField(updateAtFiled);
+			return conf;
+		}
+		return null;
+	}
+
+	/**
+	 * 加载MySQL配置  词典
+	 * @return
+	 */
+	public MySqlConf getMysqlExtDictionarys() {
+
+		String table = getProperty(MYSQL_EXT_DICT_TABLE);
+		String mysqlUrl = getProperty(MYSQL_EXT_DICT_URL);
+		String password = getProperty(MYSQL_EXT_DICT_PASSWORD);
+		String username = getProperty(MYSQL_EXT_DICT_USERNAME);
+
+		String keywordFiled = getProperty(MYSQL_EXT_DICT_KEYWORDFIELD);
+		keywordFiled= keywordFiled==null?"keyWord":keywordFiled;
+
+		String createAtFiled = getProperty(MYSQL_EXT_DICT_CREATEATFIELD);
+		createAtFiled= createAtFiled==null?"create_at":createAtFiled;
+
+		String updateAtFiled = getProperty(MYSQL_EXT_DICT_UPDATEATFIELD);
+		updateAtFiled= updateAtFiled==null?"update_at":updateAtFiled;
+
+		if (table != null && mysqlUrl != null && password != null && username != null) {
+			MySqlConf conf = new MySqlConf();
+			conf.setPassWord(password);
+			conf.setTable(table);
+			conf.setUrl(mysqlUrl);
+			conf.setUserName(username);
+			conf.setKeyWordField(keywordFiled);
+			conf.setCreateAtField(createAtFiled);
+			conf.setUpdateAtField(updateAtFiled);
+			return conf;
+		}
+		return null;
+	}
+
 	private String getDictRoot() {
 		return conf_dir.toAbsolutePath().toString();
 	}
@@ -391,6 +498,9 @@ public class Dictionary {
 		this.loadExtDict();
 		// 加载远程自定义词库
 		this.loadRemoteExtDict();
+
+		//加载mysql自定义词库
+		this.loadMySqlExtDict();
 	}
 
 	/**
@@ -438,6 +548,29 @@ public class Dictionary {
 		return AccessController.doPrivileged((PrivilegedAction<List<String>>) () -> {
 			return getRemoteWordsUnprivileged(location);
 		});
+	}
+
+
+	/**
+	 * 加载远程扩展词典到主词库表
+	 */
+	private void loadMySqlExtDict() {
+		MySqlConf mySqlConf = getMysqlExtDictionarys();
+		MysqlDb mysqlDb = new MysqlDb(mySqlConf);
+		ResultSet rs = mysqlDb.getKeyWordResultSet();
+		try {
+			while (rs.next()) {
+				String theWord = rs.getString(1);
+				if (theWord != null && !"".equals(theWord.trim())) {
+					// 加载扩展词典数据到主内存词典中
+					logger.info("[MYSQL EXT] "+theWord);
+					_MainDict.fillSegment(theWord.trim().toLowerCase().toCharArray());
+				}
+			}
+		}catch (Exception e){
+			logger.error(e.getMessage());
+		}
+		mysqlDb.close();
 	}
 
 	/**
@@ -528,6 +661,24 @@ public class Dictionary {
 					_StopWords.fillSegment(theWord.trim().toLowerCase().toCharArray());
 				}
 			}
+		}
+
+
+		try{
+			MySqlConf mySqlConf = getMysqlExtStopWordDictionarys();
+			MysqlDb mysqlDb = new MysqlDb(mySqlConf);
+			ResultSet rs = mysqlDb.getKeyWordResultSet();
+
+			while (rs.next()){
+				String keyword = rs.getString(1);
+				if (keyword != null && !"".equals(keyword.trim())) {
+					// 加载远程词典数据到主内存中
+					logger.info("[MYSQL STOP] "+keyword);
+					_StopWords.fillSegment(keyword.trim().toLowerCase().toCharArray());
+				}
+			}
+		}catch (Exception e){
+			logger.error(e);
 		}
 
 	}

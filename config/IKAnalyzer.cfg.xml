@@ -10,4 +10,23 @@
 	<!-- <entry key="remote_ext_dict">words_location</entry> -->
 	<!--用户可以在这里配置远程扩展停止词字典-->
 	<!-- <entry key="remote_ext_stopwords">words_location</entry> -->
+
+	<!--mysql  扩展词典-->
+	<entry key="mysql_ext_dict_url"></entry>
+	<entry key="mysql_ext_dict_username"></entry>
+	<entry key="mysql_ext_dict_password"></entry>
+	<entry key="mysql_ext_dict_table"></entry>
+	<entry key="mysql_ext_dict_keywordField"></entry>
+	<entry key="mysql_ext_dict_createAtField"></entry>
+	<entry key="mysql_ext_dict_updateAtField"></entry>
+
+	<!--mysql  停用词-->
+	<entry key="mysql_ext_stopwords_url"></entry>
+	<entry key="mysql_ext_stopwords_username"></entry>
+	<entry key="mysql_ext_stopwords_password"></entry>
+	<entry key="mysql_ext_stopwords_table"></entry>
+	<entry key="mysql_ext_stopwords_keywordField"></entry>
+	<entry key="mysql_ext_stopwords_createAtField"></entry>
+	<entry key="mysql_ext_stopwords_updateAtField"></entry>
+
 </properties>
