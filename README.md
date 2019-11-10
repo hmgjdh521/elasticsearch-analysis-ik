@@ -25,22 +25,24 @@ Versions
 	<entry key="remote_ext_stopwords">http://xxx.com/xxx.dic</entry>
     
     <!--mysql  扩展词典-->
-    <entry key="mysql_ext_dict_url"></entry>
-    <entry key="mysql_ext_dict_username"></entry>
-    <entry key="mysql_ext_dict_password"></entry>
-    <entry key="mysql_ext_dict_table"></entry>
-    <entry key="mysql_ext_dict_keywordField"></entry>
-    <entry key="mysql_ext_dict_createAtField"></entry>
-    <entry key="mysql_ext_dict_updateAtField"></entry>
-    
-    <!--mysql  停用词-->
-    <entry key="mysql_ext_stopwords_url"></entry>
-    <entry key="mysql_ext_stopwords_username"></entry>
-    <entry key="mysql_ext_stopwords_password"></entry>
-    <entry key="mysql_ext_stopwords_table"></entry>
-    <entry key="mysql_ext_stopwords_keywordField"></entry>
-    <entry key="mysql_ext_stopwords_createAtField"></entry>
-    <entry key="mysql_ext_stopwords_updateAtField"></entry>
+	<entry key="mysql_ext_dict_url">jdbc:mysql://localhost:3306/ik</entry>
+	<entry key="mysql_ext_dict_username">root</entry>
+	<entry key="mysql_ext_dict_password">123456</entry>
+	<entry key="mysql_ext_dict_table">keyWord</entry>
+	<entry key="mysql_ext_dict_keywordField">keyword</entry>
+	<entry key="mysql_ext_dict_createAtField">create_at</entry>
+	<entry key="mysql_ext_dict_updateAtField">update_at</entry>
+
+	<!--mysql  停用词-->
+	<entry key="mysql_ext_stopwords_url"></entry>
+	<entry key="mysql_ext_stopwords_username"></entry>
+	<entry key="mysql_ext_stopwords_password"></entry>
+	<entry key="mysql_ext_stopwords_table"></entry>
+	<entry key="mysql_ext_stopwords_keywordField"></entry>
+	<entry key="mysql_ext_stopwords_createAtField"></entry>
+	<entry key="mysql_ext_stopwords_updateAtField"></entry>
+
+
 
 </properties>
 ```

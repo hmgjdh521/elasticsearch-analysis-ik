@@ -16,7 +16,7 @@ import java.util.Date;
  * @date 2019-11-10 10:52
  */
 public class MysqlDb {
-    private static final Logger logger = ESPluginLoggerFactory.getLogger(Monitor.class.getName());
+    private static final Logger logger = ESPluginLoggerFactory.getLogger(MysqlDb.class.getName());
 
     // MySQL 8.0 以下版本 - JDBC 驱动名及数据库 URL
     static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
@@ -34,18 +34,16 @@ public class MysqlDb {
             // 注册 JDBC 驱动
             Class.forName(JDBC_DRIVER);
             // 打开链接
-            logger.info("连接数据库...");
-            String url =mySqlConf.getUrl()+"?characterEncoding=UTF8&zeroDateTimeBehavior=convertToNull";
+            String url =mySqlConf.getUrl();
             conn = (Connection) DriverManager.getConnection(url,mySqlConf.getUserName(),mySqlConf.getPassWord());
             // 执行查询
-            logger.info(" 实例化Statement对象...");
             stmt = (Statement) conn.createStatement();
         }catch(SQLException se){
             // 处理 JDBC 错误
-            logger.error(se.getMessage());
+            logger.error("[MYSQL->MysqlDb]  "+se.getMessage());
         }catch(Exception e){
             // 处理 Class.forName 错误
-            logger.error(e.getMessage());
+            logger.error("[MYSQL->MysqlDb]  "+e.getMessage());
         }
     }
 
@@ -63,7 +61,7 @@ public class MysqlDb {
                 return date.getTime();
             }
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("[MYSQL->MysqlDb.getMaxDateTime]  "+e.getMessage());
         }
         return 0L;
     }
@@ -76,8 +74,8 @@ public class MysqlDb {
             while (resultSet.next()) {
                 return resultSet.getLong(1);
             }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
+        } catch (SQLException e) {
+            logger.error("[MYSQL->MysqlDb.getCount]  "+e.getMessage());
         }
         return 0L;
     }
@@ -88,8 +86,8 @@ public class MysqlDb {
             String sql = "select "+mySqlConf.getKeyWordField()+" from "+mySqlConf.getTable();
             resultSet = stmt.executeQuery(sql);
             return resultSet;
-        } catch (Exception e) {
-            logger.error(e.getMessage());
+        } catch (SQLException e) {
+            logger.error("[MYSQL->MysqlDb.getKeyWordResultSet]  "+e.getMessage());
         }
         return null;
     }
@@ -102,7 +100,7 @@ public class MysqlDb {
         try {
             if (conn != null) conn.close();
         } catch (SQLException se) {
-            se.printStackTrace();
+            logger.error("[MYSQL->MysqlDb.close]  "+se.getMessage());
         }
     }
 

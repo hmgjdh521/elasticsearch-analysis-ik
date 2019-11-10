@@ -12,9 +12,8 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 public class MySqlMonitor implements Runnable {
-    private static final Logger logger = ESPluginLoggerFactory.getLogger(Monitor.class.getName());
+    private static final Logger logger = ESPluginLoggerFactory.getLogger(MySqlMonitor.class.getName());
 
-    private static CloseableHttpClient httpclient = HttpClients.createDefault();
     /*
      * 上次更改时间
      */
@@ -46,6 +45,9 @@ public class MySqlMonitor implements Runnable {
     }
 
     private void runUnprivileged() {
+        if(mysqlExt==null){
+            return;
+        }
         MysqlDb mysqlDb = new MysqlDb(mysqlExt);
         long maxDate = mysqlDb.getMaxDateTime();
         long dataCount = mysqlDb.getCount();
@@ -54,7 +56,8 @@ public class MySqlMonitor implements Runnable {
         if(maxDate!=last_modified || dataCount!=last_count){
             // 远程词库有更新,需要重新加载词典，并修改last_modified,eTags
             Dictionary.getSingleton().reLoadMainDict();
-
+            last_count = dataCount;
+            last_modified = maxDate;
         }else{
 
         }

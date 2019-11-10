@@ -39,6 +39,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -556,6 +557,9 @@ public class Dictionary {
 	 */
 	private void loadMySqlExtDict() {
 		MySqlConf mySqlConf = getMysqlExtDictionarys();
+		if(mySqlConf==null){
+			return;
+		}
 		MysqlDb mysqlDb = new MysqlDb(mySqlConf);
 		ResultSet rs = mysqlDb.getKeyWordResultSet();
 		try {
@@ -567,8 +571,8 @@ public class Dictionary {
 					_MainDict.fillSegment(theWord.trim().toLowerCase().toCharArray());
 				}
 			}
-		}catch (Exception e){
-			logger.error(e.getMessage());
+		}catch (SQLException e){
+			logger.error("[MYSQL加载失败loadMySqlExtDict] "+e.getMessage());
 		}
 		mysqlDb.close();
 	}
@@ -666,6 +670,9 @@ public class Dictionary {
 
 		try{
 			MySqlConf mySqlConf = getMysqlExtStopWordDictionarys();
+			if(mySqlConf==null){
+				return;
+			}
 			MysqlDb mysqlDb = new MysqlDb(mySqlConf);
 			ResultSet rs = mysqlDb.getKeyWordResultSet();
 
@@ -677,8 +684,8 @@ public class Dictionary {
 					_StopWords.fillSegment(keyword.trim().toLowerCase().toCharArray());
 				}
 			}
-		}catch (Exception e){
-			logger.error(e);
+		}catch (SQLException e){
+			logger.error("[MYSQL 停用词加载失败]"+e.getMessage());
 		}
 
 	}
