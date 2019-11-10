@@ -342,7 +342,8 @@ public class Dictionary {
 		String updateAtFiled = getProperty(MYSQL_EXT_STOPWORDS_UPDATEATFIELD);
 		updateAtFiled= updateAtFiled==null?"update_at":updateAtFiled;
 
-		if (table != null && mysqlUrl != null && password != null && username != null) {
+		if (table != null && table.trim().length()>0 && mysqlUrl != null && mysqlUrl.trim().length()>0 &&
+				password != null && password.trim().length()>0 && username != null && username.trim().length()>0) {
 			MySqlConf conf = new MySqlConf();
 			conf.setPassWord(password);
 			conf.setTable(table);

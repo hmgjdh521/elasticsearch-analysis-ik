@@ -74,4 +74,18 @@ public class MySqlConf {
     public void setUpdateAtField(String updateAtField) {
         this.updateAtField = updateAtField;
     }
+
+
+    @Override
+    public String toString() {
+        return "MySqlConf{" +
+                "url='" + url + '\'' +
+                ", userName='" + userName + '\'' +
+                ", passWord='" + passWord + '\'' +
+                ", table='" + table + '\'' +
+                ", keyWordField='" + keyWordField + '\'' +
+                ", createAtField='" + createAtField + '\'' +
+                ", updateAtField='" + updateAtField + '\'' +
+                '}';
+    }
 }

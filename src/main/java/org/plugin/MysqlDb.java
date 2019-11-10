@@ -3,9 +3,12 @@ package org.plugin;
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.Statement;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.SpecialPermission;
 import org.wltea.analyzer.dic.Monitor;
 import org.wltea.analyzer.help.ESPluginLoggerFactory;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,21 +33,28 @@ public class MysqlDb {
 
     public MysqlDb(MySqlConf mySqlConf) {
         this.mySqlConf=mySqlConf;
-        try{
-            // 注册 JDBC 驱动
-            Class.forName(JDBC_DRIVER);
-            // 打开链接
-            String url =mySqlConf.getUrl();
-            conn = (Connection) DriverManager.getConnection(url,mySqlConf.getUserName(),mySqlConf.getPassWord());
-            // 执行查询
-            stmt = (Statement) conn.createStatement();
-        }catch(SQLException se){
-            // 处理 JDBC 错误
-            logger.error("[MYSQL->MysqlDb]  "+se.getMessage());
-        }catch(Exception e){
-            // 处理 Class.forName 错误
-            logger.error("[MYSQL->MysqlDb]  "+e.getMessage());
-        }
+        //Java安全  获取特殊特权
+        SpecialPermission.check();
+        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+            try{
+                // 注册 JDBC 驱动
+                Class.forName(JDBC_DRIVER);
+                // 打开链接
+                String url =mySqlConf.getUrl().trim();
+                conn = (Connection) DriverManager.getConnection(url,mySqlConf.getUserName(),mySqlConf.getPassWord());
+                // 执行查询
+                stmt = (Statement) conn.createStatement();
+            }catch(SQLException se){
+                se.printStackTrace();
+                // 处理 JDBC 错误
+                logger.error("[MYSQL->MysqlDb]  "+se.getMessage());
+            }catch(Exception e){
+                // 处理 Class.forName 错误
+                logger.error("[MYSQL->MysqlDb]  "+e.getMessage());
+            }
+            return null;
+        });
+
     }
 
     public Long getMaxDateTime() {
@@ -109,7 +119,7 @@ public class MysqlDb {
         mySqlConf.setUpdateAtField("update_at");
         mySqlConf.setCreateAtField("create_at");
         mySqlConf.setKeyWordField("keyword");
-        mySqlConf.setUrl("jdbc:mysql://localhost:3306/ik");
+        mySqlConf.setUrl("jdbc:mysql://localhost:3306/ik?useUnicode=true&characterEncoding=UTF-8");
         mySqlConf.setUserName("root");
         mySqlConf.setPassWord("123456");
         mySqlConf.setTable("keyWord");

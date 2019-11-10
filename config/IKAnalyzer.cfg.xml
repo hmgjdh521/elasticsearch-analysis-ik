@@ -12,7 +12,7 @@
 	<!-- <entry key="remote_ext_stopwords">words_location</entry> -->
 
 	<!--mysql  扩展词典-->
-	<entry key="mysql_ext_dict_url"><![CDATA[ jdbc:mysql://localhost:3306/ik?useUnicode=true&characterEncoding=UTF-8 ]]></entry>
+	<entry key="mysql_ext_dict_url"><![CDATA[jdbc:mysql://localhost:3306/ik?useUnicode=true&characterEncoding=UTF-8]]></entry>
 	<entry key="mysql_ext_dict_username">root</entry>
 	<entry key="mysql_ext_dict_password">123456</entry>
 	<entry key="mysql_ext_dict_table">keyWord</entry>
