@@ -25,12 +25,19 @@ Versions
 	<entry key="remote_ext_stopwords">http://xxx.com/xxx.dic</entry>
     
     <!--mysql  扩展词典-->
+    <!--jdbc url-->
 	<entry key="mysql_ext_dict_url">jdbc:mysql://localhost:3306/ik</entry>
+	<!--数据库用户名-->
 	<entry key="mysql_ext_dict_username">root</entry>
+	<!--数据库密码-->
 	<entry key="mysql_ext_dict_password">123456</entry>
+	<!--所在表-->
 	<entry key="mysql_ext_dict_table">keyWord</entry>
+	<!--词的列名 默认keyword-->
 	<entry key="mysql_ext_dict_keywordField">keyword</entry>
+	<!--创建时间列名 默认create_at-->
 	<entry key="mysql_ext_dict_createAtField">create_at</entry>
+	<!--更新时间列名 默认update_at-->
 	<entry key="mysql_ext_dict_updateAtField">update_at</entry>
 
 	<!--mysql  停用词-->
